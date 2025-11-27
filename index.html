@@ -34,7 +34,7 @@
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
                     .then(registration => {
                         console.log('Service Worker 注册成功:', registration.scope);
                     })
@@ -68,9 +68,11 @@
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            // 防止 Chrome 67 及更早版本自动显示安装提示
+            // 1. 阻止 Chrome 67 及更早版本自动显示安装提示 (原生 mini-infobar)
+            // 如果你希望浏览器自动弹出安装提示，请注释掉下面这行 e.preventDefault();
             e.preventDefault();
-            // 保存事件以便稍后触发
+            
+            // 2. 保存事件以便稍后触发
             deferredPrompt = e;
             // 更新 UI
             installBtn.style.display = 'block';
