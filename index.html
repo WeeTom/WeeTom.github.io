@@ -77,6 +77,11 @@
             if (textElement) {
                 textElement.textContent = targetUrl;
             }
+
+            // 3秒后自动跳转
+            setTimeout(function() {
+                window.location.href = targetUrl;
+            }, 3000);
         });
     </script>
 </body>
