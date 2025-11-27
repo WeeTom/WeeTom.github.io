@@ -86,7 +86,8 @@
             const iconImg = new Image();
             iconImg.onload = () => log('图标 (icon-192.png) 可加载');
             iconImg.onerror = () => log('图标 (icon-192.png) 加载失败', true);
-            iconImg.src = 'icon-192.png';
+            // 添加随机参数避开缓存
+            iconImg.src = 'icon-192.png?t=' + new Date().getTime();
 
             // 3. SW 状态检查
             if ('serviceWorker' in navigator) {
