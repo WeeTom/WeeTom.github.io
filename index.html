@@ -55,27 +55,78 @@
 
     <script>
         // 简单的日志工具
-        function log(msg) {
+        function log(msg, isError = false) {
             const logEl = document.getElementById('debug-log');
             const time = new Date().toLocaleTimeString();
-            logEl.innerHTML += `\n[${time}] ${msg}`;
+            const style = isError ? 'color: #ff6b6b;' : 'color: #0f0;';
+            logEl.innerHTML += `\n<span style="${style}">[${time}] ${msg}</span>`;
             console.log(msg);
         }
 
+        // 页面加载诊断
+        window.addEventListener('load', async () => {
+            log('页面加载完成');
+            log('当前 URL: ' + window.location.href);
+            
+            // 1. 检查 Manifest 可访问性
+            try {
+                const manifestRes = await fetch('./manifest.json');
+                if (manifestRes.ok) {
+                    log('Manifest 加载成功 (Status: ' + manifestRes.status + ')');
+                    const json = await manifestRes.json();
+                    log('Manifest 解析成功, name: ' + json.name);
+                } else {
+                    log('Manifest 加载失败: ' + manifestRes.status, true);
+                }
+            } catch (e) {
+                log('Manifest 请求出错: ' + e.message, true);
+            }
+
+            // 2. 检查图标
+            const iconImg = new Image();
+            iconImg.onload = () => log('图标 (icon-192.png) 可加载');
+            iconImg.onerror = () => log('图标 (icon-192.png) 加载失败', true);
+            iconImg.src = 'icon-192.png';
+
+            // 3. SW 状态检查
+            if ('serviceWorker' in navigator) {
+                if (navigator.serviceWorker.controller) {
+                    log('Service Worker 当前正在控制页面');
+                } else {
+                    log('Service Worker 尚未控制页面 (首次加载或硬刷新)');
+                }
+            }
+        });
+
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                log('开始注册 Service Worker...');
-                navigator.serviceWorker.register('./sw.js', { scope: './' })
-                    .then(registration => {
-                        log('SW 注册成功，Scope: ' + registration.scope);
-                    })
-                    .catch(error => {
-                        log('SW 注册失败: ' + error);
+             // ... 保持原有逻辑 ...
+             navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(registration => {
+                    log('SW 注册调用成功');
+                    
+                    // 监听安装状态变化
+                    if (registration.installing) {
+                        log('SW 状态: installing');
+                        const worker = registration.installing;
+                        worker.addEventListener('statechange', () => {
+                            log('SW 安装状态变更: ' + worker.state);
+                        });
+                    } else if (registration.waiting) {
+                        log('SW 状态: waiting (等待激活)');
+                    } else if (registration.active) {
+                        log('SW 状态: active (已激活)');
+                    }
+
+                    registration.addEventListener('updatefound', () => {
+                        log('发现新的 SW 版本');
                     });
-            });
+                })
+                .catch(error => {
+                    log('SW 注册失败: ' + error, true);
+                });
         } else {
-            log('当前浏览器不支持 Service Worker');
+            log('当前浏览器不支持 Service Worker', true);
         }
 
         // 处理安装提示
