@@ -54,9 +54,31 @@
 <body>
     <div class="container">
         <h1>Nocoly 跳转测试</h1>
-        <a href="mingdao://callbackurl=https://www.baidu.com?code=12345" class="btn">点击打开</a>
-        <div class="url-text">nocoly://callbackurl=https://www.baidu.com?code=12345</div>
+        <a id="target-link" href="#" class="btn">点击打开</a>
+        <div id="url-display" class="url-text">正在加载链接...</div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取 URL 参数中的 appscheme
+            const urlParams = new URLSearchParams(window.location.search);
+            // 如果没有提供 appscheme，默认使用 'mingdao'
+            const appScheme = urlParams.get('appscheme') || 'mingdao';
+            
+            // 构建目标 URL
+            const targetUrl = `${appScheme}://callbackurl=https://www.baidu.com?code=12345`;
+            
+            // 更新 DOM
+            const linkElement = document.getElementById('target-link');
+            const textElement = document.getElementById('url-display');
+            
+            if (linkElement) {
+                linkElement.href = targetUrl;
+            }
+            if (textElement) {
+                textElement.textContent = targetUrl;
+            }
+        });
+    </script>
 </body>
 </html>
 
