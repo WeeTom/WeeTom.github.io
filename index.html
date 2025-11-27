@@ -137,9 +137,31 @@
 
         // 检查是否已安装
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        
         if (isStandalone) {
             log('检测到应用已在 Standalone 模式运行');
+            installBtn.style.display = 'none';
+            installTip.textContent = '已安装';
+        } else if (isIOS) {
+            log('检测到 iOS 设备');
+            installBtn.style.display = 'none'; // iOS 不支持按钮触发安装
+            
+            // 显示 iOS 专属安装指引
+            installTip.innerHTML = `
+                iOS 安装说明：<br>
+                1. 点击浏览器底部中间的 "分享" 按钮 <span style="font-size: 20px">⎋</span><br>
+                2. 向下滑动找到 "添加到主屏幕" <span style="font-size: 20px">➕</span>
+            `;
+            installTip.style.color = '#333';
+            installTip.style.textAlign = 'left';
+            installTip.style.lineHeight = '1.6';
+            installTip.style.padding = '15px';
+            installTip.style.background = '#fff';
+            installTip.style.borderRadius = '8px';
+            installTip.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
         }
+
 
         // 监听安装事件
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -179,6 +201,9 @@
                     }
                     deferredPrompt = null;
                 });
+            } else if (isIOS) {
+                // 虽然我们隐藏了按钮，但为了代码完整性
+                alert('iOS 请点击底部 "分享" -> "添加到主屏幕"');
             } else {
                 log('错误: 没有可用的安装提示事件 (deferredPrompt is null)');
                 alert('无法触发安装，可能原因：\n1. 已经在非 HTTPS 环境\n2. 浏览器判定不符合安装标准\n3. 之前已安装过');
