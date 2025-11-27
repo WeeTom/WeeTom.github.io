@@ -3,213 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 PWA 应用</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="stylesheet" href="style.css">
-    <meta name="theme-color" content="#4A90E2">
+    <title>Nocoly 跳转测试</title>
     <style>
-        /* 添加调试日志样式 */
-        #debug-log {
-            background: #333;
-            color: #0f0;
-            padding: 10px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            border-radius: 4px;
-            white-space: pre-wrap;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 300px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            word-break: break-all;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .url-text {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #666;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>PWA 示例</h1>
-    </header>
-    <main>
-        <p>这是一个简单的渐进式 Web 应用 (PWA)。</p>
-        
-        <!-- 安装按钮区域 -->
-        <div class="install-area">
-            <button id="installBtn" class="primary-btn">下载/安装应用到桌面</button>
-            <p id="installTip" class="tip">检测中...</p>
-        </div>
-
-        <div class="card">
-            <h2>内容区域</h2>
-            <p>这里是一些示例内容。当你离线时，这个页面应该仍然可以访问。</p>
-        </div>
-
-        <!-- 调试日志区域 -->
-        <div class="card">
-            <h3>调试日志</h3>
-            <div id="debug-log">Waiting for events...</div>
-        </div>
-    </main>
-    <footer>
-        <p>&copy; 2024 PWA Test</p>
-    </footer>
-
-    <script>
-        // 简单的日志工具
-        function log(msg, isError = false) {
-            const logEl = document.getElementById('debug-log');
-            const time = new Date().toLocaleTimeString();
-            const style = isError ? 'color: #ff6b6b;' : 'color: #0f0;';
-            logEl.innerHTML += `\n<span style="${style}">[${time}] ${msg}</span>`;
-            console.log(msg);
-        }
-
-        // 页面加载诊断
-        window.addEventListener('load', async () => {
-            log('页面加载完成');
-            log('当前 URL: ' + window.location.href);
-            
-            // 1. 检查 Manifest 可访问性
-            try {
-                const manifestRes = await fetch('./manifest.json');
-                if (manifestRes.ok) {
-                    log('Manifest 加载成功 (Status: ' + manifestRes.status + ')');
-                    const json = await manifestRes.json();
-                    log('Manifest 解析成功, name: ' + json.name);
-                } else {
-                    log('Manifest 加载失败: ' + manifestRes.status, true);
-                }
-            } catch (e) {
-                log('Manifest 请求出错: ' + e.message, true);
-            }
-
-            // 2. 检查图标
-            const iconImg = new Image();
-            iconImg.onload = () => log('图标 (icon-192.png) 可加载');
-            iconImg.onerror = () => log('图标 (icon-192.png) 加载失败', true);
-            // 添加随机参数避开缓存
-            iconImg.src = 'icon-192.png?t=' + new Date().getTime();
-
-            // 3. SW 状态检查
-            if ('serviceWorker' in navigator) {
-                if (navigator.serviceWorker.controller) {
-                    log('Service Worker 当前正在控制页面');
-                } else {
-                    log('Service Worker 尚未控制页面 (首次加载或硬刷新)');
-                }
-            }
-        });
-
-        // 注册 Service Worker
-        if ('serviceWorker' in navigator) {
-             // ... 保持原有逻辑 ...
-             navigator.serviceWorker.register('./sw.js', { scope: './' })
-                .then(registration => {
-                    log('SW 注册调用成功');
-                    
-                    // 监听安装状态变化
-                    if (registration.installing) {
-                        log('SW 状态: installing');
-                        const worker = registration.installing;
-                        worker.addEventListener('statechange', () => {
-                            log('SW 安装状态变更: ' + worker.state);
-                        });
-                    } else if (registration.waiting) {
-                        log('SW 状态: waiting (等待激活)');
-                    } else if (registration.active) {
-                        log('SW 状态: active (已激活)');
-                    }
-
-                    registration.addEventListener('updatefound', () => {
-                        log('发现新的 SW 版本');
-                    });
-                })
-                .catch(error => {
-                    log('SW 注册失败: ' + error, true);
-                });
-        } else {
-            log('当前浏览器不支持 Service Worker', true);
-        }
-
-        // 处理安装提示
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-        const installTip = document.getElementById('installTip');
-
-        // 检查是否已安装
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        if (isStandalone) {
-            log('检测到应用已在 Standalone 模式运行');
-            installBtn.style.display = 'none';
-            installTip.textContent = '已安装';
-        } else if (isIOS) {
-            log('检测到 iOS 设备');
-            installBtn.style.display = 'none'; // iOS 不支持按钮触发安装
-            
-            // 显示 iOS 专属安装指引
-            installTip.innerHTML = `
-                iOS 安装说明：<br>
-                1. 点击浏览器底部中间的 "分享" 按钮 <span style="font-size: 20px">⎋</span><br>
-                2. 向下滑动找到 "添加到主屏幕" <span style="font-size: 20px">➕</span>
-            `;
-            installTip.style.color = '#333';
-            installTip.style.textAlign = 'left';
-            installTip.style.lineHeight = '1.6';
-            installTip.style.padding = '15px';
-            installTip.style.background = '#fff';
-            installTip.style.borderRadius = '8px';
-            installTip.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-        }
-
-
-        // 监听安装事件
-        window.addEventListener('beforeinstallprompt', (e) => {
-            log('触发 beforeinstallprompt 事件!');
-            // 1. 阻止 Chrome 67 及更早版本自动显示安装提示
-            e.preventDefault();
-            
-            // 2. 保存事件以便稍后触发
-            deferredPrompt = e;
-            
-            // 更新 UI
-            installBtn.style.display = 'block';
-            installTip.textContent = '点击上方按钮安装应用到设备';
-            log('已拦截自动提示，显示安装按钮');
-        });
-
-        // 监听 appinstalled 事件
-        window.addEventListener('appinstalled', (evt) => {
-            log('应用已成功安装');
-        });
-
-        installBtn.addEventListener('click', (e) => {
-            if (deferredPrompt) {
-                // 隐藏安装提示
-                installTip.textContent = '正在安装...';
-                // 显示安装提示
-                deferredPrompt.prompt();
-                // 等待用户响应
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        log('用户接受安装');
-                        installTip.textContent = '应用已安装';
-                        installBtn.style.display = 'none';
-                    } else {
-                        log('用户拒绝安装');
-                        installTip.textContent = '用户取消了安装';
-                    }
-                    deferredPrompt = null;
-                });
-            } else if (isIOS) {
-                // 虽然我们隐藏了按钮，但为了代码完整性
-                alert('iOS 请点击底部 "分享" -> "添加到主屏幕"');
-            } else {
-                log('错误: 没有可用的安装提示事件 (deferredPrompt is null)');
-                alert('无法触发安装，可能原因：\n1. 已经在非 HTTPS 环境\n2. 浏览器判定不符合安装标准\n3. 之前已安装过');
-            }
-        });
-    </script>
+    <div class="container">
+        <h1>Nocoly 跳转测试</h1>
+        <a href="nocoly://callbackurl=https://www.baidu.com?code=12345" class="btn">点击打开</a>
+        <div class="url-text">nocoly://callbackurl=https://www.baidu.com?code=12345</div>
+    </div>
 </body>
 </html>
 
