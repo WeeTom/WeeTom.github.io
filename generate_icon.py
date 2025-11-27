@@ -26,7 +26,13 @@ def make_png(width, height, color):
     
     return png
 
-# Create a 512x512 blue icon
-with open('icon.png', 'wb') as f:
-    f.write(make_png(512, 512, (74, 144, 226))) # #4A90E2
+# Blue color #4A90E2 -> (74, 144, 226)
+color = (74, 144, 226)
 
+# Create 192x192 icon
+with open('icon-192.png', 'wb') as f:
+    f.write(make_png(192, 192, color))
+
+# Create 512x512 icon
+with open('icon-512.png', 'wb') as f:
+    f.write(make_png(512, 512, color))
