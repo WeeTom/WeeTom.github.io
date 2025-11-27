@@ -7,6 +7,21 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <meta name="theme-color" content="#4A90E2">
+    <style>
+        /* 添加调试日志样式 */
+        #debug-log {
+            background: #333;
+            color: #0f0;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -25,23 +40,40 @@
             <h2>内容区域</h2>
             <p>这里是一些示例内容。当你离线时，这个页面应该仍然可以访问。</p>
         </div>
+
+        <!-- 调试日志区域 -->
+        <div class="card">
+            <h3>调试日志</h3>
+            <div id="debug-log">Waiting for events...</div>
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 PWA Test</p>
     </footer>
 
     <script>
+        // 简单的日志工具
+        function log(msg) {
+            const logEl = document.getElementById('debug-log');
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `\n[${time}] ${msg}`;
+            console.log(msg);
+        }
+
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
+                log('开始注册 Service Worker...');
                 navigator.serviceWorker.register('./sw.js', { scope: './' })
                     .then(registration => {
-                        console.log('Service Worker 注册成功:', registration.scope);
+                        log('SW 注册成功，Scope: ' + registration.scope);
                     })
                     .catch(error => {
-                        console.log('Service Worker 注册失败:', error);
+                        log('SW 注册失败: ' + error);
                     });
             });
+        } else {
+            log('当前浏览器不支持 Service Worker');
         }
 
         // 处理安装提示
@@ -49,35 +81,30 @@
         const installBtn = document.getElementById('installBtn');
         const installTip = document.getElementById('installTip');
 
-        // 检查是否已安装（简单的检查方式）
+        // 检查是否已安装
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
         if (isStandalone) {
-            installTip.textContent = '已安装在桌面模式运行';
-            installBtn.style.display = 'none';
-        } else if (isSafari) {
-            installTip.textContent = 'Safari 浏览器请在菜单栏选择 "文件" -> "添加到程序坞"';
-            // Safari 不支持按钮触发安装，隐藏按钮或禁用
-            installBtn.textContent = 'Safari 请手动安装';
-            installBtn.disabled = true;
-            installBtn.style.backgroundColor = '#ccc';
-            installBtn.style.cursor = 'default';
-        } else {
-            installTip.textContent = '如果按钮无效，请检查浏览器地址栏安装图标';
+            log('检测到应用已在 Standalone 模式运行');
         }
 
+        // 监听安装事件
         window.addEventListener('beforeinstallprompt', (e) => {
-            // 1. 阻止 Chrome 67 及更早版本自动显示安装提示 (原生 mini-infobar)
-            // 如果你希望浏览器自动弹出安装提示，请注释掉下面这行 e.preventDefault();
+            log('触发 beforeinstallprompt 事件!');
+            // 1. 阻止 Chrome 67 及更早版本自动显示安装提示
             e.preventDefault();
             
             // 2. 保存事件以便稍后触发
             deferredPrompt = e;
+            
             // 更新 UI
             installBtn.style.display = 'block';
             installTip.textContent = '点击上方按钮安装应用到设备';
-            console.log('可以安装 PWA');
+            log('已拦截自动提示，显示安装按钮');
+        });
+
+        // 监听 appinstalled 事件
+        window.addEventListener('appinstalled', (evt) => {
+            log('应用已成功安装');
         });
 
         installBtn.addEventListener('click', (e) => {
@@ -89,20 +116,18 @@
                 // 等待用户响应
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('用户接受了安装请求');
+                        log('用户接受安装');
                         installTip.textContent = '应用已安装';
                         installBtn.style.display = 'none';
                     } else {
-                        console.log('用户拒绝了安装请求');
+                        log('用户拒绝安装');
                         installTip.textContent = '用户取消了安装';
                     }
                     deferredPrompt = null;
                 });
-            } else if (isSafari) {
-                alert('Safari 浏览器不支持按钮安装。\n\n请在顶部菜单栏选择：\n"文件" (File) -> "添加到程序坞" (Add to Dock)');
             } else {
-                // 如果没有触发 beforeinstallprompt（例如非 HTTPS/Localhost，或已安装）
-                alert('无法自动触发安装。\n\n可能的原因：\n1. 已经在非 HTTPS 环境（如局域网 IP）访问。\n2. 浏览器不支持 PWA 安装。\n3. 应用已经安装。\n\n请尝试使用浏览器菜单中的"安装"或"添加到主屏幕"选项。');
+                log('错误: 没有可用的安装提示事件 (deferredPrompt is null)');
+                alert('无法触发安装，可能原因：\n1. 已经在非 HTTPS 环境\n2. 浏览器判定不符合安装标准\n3. 之前已安装过');
             }
         });
     </script>
