@@ -53,8 +53,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Nocoly 跳转测试</h1>
-        <a id="target-link" href="#" class="btn">点击打开</a>
+        <h1>已完成登录</h1>
+        <a id="target-link" href="#" class="btn">点击返回App</a>
         <div id="url-display" class="url-text">正在加载链接...</div>
     </div>
     <script>
@@ -65,7 +65,7 @@
             const appScheme = urlParams.get('appscheme') || 'mingdao';
             
             // 构建目标 URL
-            const targetUrl = `${appScheme}://callbackurl=https://www.baidu.com?code=12345`;
+            const targetUrl = `${appScheme}://ssocallback?access_token=123&refresh_token=456&expires_in=7200`;
             
             // 更新 DOM
             const linkElement = document.getElementById('target-link');
