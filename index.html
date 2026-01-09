@@ -1,89 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nocoly 跳转测试</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 90%;
-            width: 300px;
-        }
-        h1 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 1.5rem;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 16px;
-            transition: background-color 0.2s;
-            word-break: break-all;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .url-text {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: #666;
-            word-break: break-all;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>已完成登录</h1>
-        <a id="target-link" href="#" class="btn">点击返回App</a>
-        <div id="url-display" class="url-text">正在加载链接...</div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 获取 URL 参数中的 appscheme
-            const urlParams = new URLSearchParams(window.location.search);
-            // 如果没有提供 appscheme，默认使用 'mingdao'
-            const appScheme = urlParams.get('appscheme') || 'mingdao';
-            
-            // 构建目标 URL
-            const targetUrl = `${appScheme}://ssocallback?access_token=123&refresh_token=456&expires_in=7200`;
-            
-            // 更新 DOM
-            const linkElement = document.getElementById('target-link');
-            const textElement = document.getElementById('url-display');
-            
-            if (linkElement) {
-                linkElement.href = targetUrl;
-            }
-            if (textElement) {
-                textElement.textContent = targetUrl;
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>WeeTom - 自动深色/浅色模式示例</title>
+    <meta
+      name="description"
+      content="一个支持自动切换深色/浅色模式的网站示例，内容简单呈现。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./main.js"></script>
+  </head>
+  <body>
+    <header class="container header">
+      <a class="brand" href="#" aria-label="返回首页">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span class="brand__text">WeeTom</span>
+      </a>
 
-            // 3秒后自动跳转
-            setTimeout(function() {
-                window.location.href = targetUrl;
-            }, 3000);
-        });
-    </script>
-</body>
+      <div class="theme">
+        <label class="theme__label" for="themeMode">主题</label>
+        <select id="themeMode" class="theme__select" aria-label="主题模式">
+          <option value="auto">自动（跟随系统）</option>
+          <option value="light">浅色</option>
+          <option value="dark">深色</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="container main">
+      <section class="hero">
+        <p class="pill">Auto Theme • Light/Dark</p>
+        <h1>自动切换深色/浅色模式的网站</h1>
+        <p class="muted">
+          默认跟随你的系统外观设置；你也可以在右上角选择「浅色/深色」强制覆盖，并会自动记住。
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#cards">看示例内容</a>
+          <a class="btn btn--ghost" href="#about">了解实现方式</a>
+        </div>
+      </section>
+
+      <section id="cards" class="grid">
+        <article class="card">
+          <h2>更舒适的阅读</h2>
+          <p class="muted">
+            深色模式更适合夜间；浅色模式更适合强光环境。自动切换可减少手动操作。
+          </p>
+          <ul class="list">
+            <li>跟随系统偏好</li>
+            <li>支持手动覆盖</li>
+            <li>设置可持久化</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>设计更统一</h2>
+          <p class="muted">
+            通过 CSS 变量统一管理颜色、阴影与边框，组件在两种主题下保持一致的层级与对比度。
+          </p>
+          <div class="swatches" aria-label="颜色示例">
+            <span class="swatch swatch--accent" title="强调色"></span>
+            <span class="swatch swatch--surface" title="卡片底色"></span>
+            <span class="swatch swatch--border" title="边框色"></span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>实现简单</h2>
+          <p class="muted">
+            使用 <code>prefers-color-scheme</code> 处理自动模式，用 <code>data-theme</code>
+            处理手动覆盖。
+          </p>
+          <pre class="code" aria-label="示例代码片段"><code>/* 自动模式（默认） */
+@media (prefers-color-scheme: dark) { ... }
+
+/* 手动覆盖 */
+html[data-theme="dark"] { ... }</code></pre>
+        </article>
+      </section>
+
+      <section id="about" class="about">
+        <h2>关于这个页面</h2>
+        <p class="muted">
+          这是一个不依赖任何框架的示例页：打开即可运行，适合做模板或快速原型。你想要换成 React/Next.js/Vite
+          也很容易，我可以继续帮你升级。
+        </p>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <span class="muted">© <span id="year"></span> WeeTom</span>
+      <span class="muted">自动深色/浅色模式示例</span>
+    </footer>
+  </body>
 </html>
+
 
