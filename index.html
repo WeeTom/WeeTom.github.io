@@ -9,74 +9,8 @@
       name="description"
       content="一个支持自动切换深色/浅色模式的网站示例，内容简单呈现。"
     />
-    <script>
-      (function () {
-        const CUSTOM_SCHEME = "custom-scheme://";
-
-        function isIOSApp() {
-          const ua = navigator.userAgent || "";
-          const isiOS = /iPad|iPhone|iPod/i.test(ua);
-          const hasWKHandler = !!window.webkit?.messageHandlers;
-          const isStandalone = window.navigator.standalone === true;
-          return isiOS && (hasWKHandler || isStandalone);
-        }
-
-        function toCustomScheme(url) {
-          if (!url) return url;
-          const trimmed = url.trim();
-          if (
-            !trimmed ||
-            trimmed.startsWith(CUSTOM_SCHEME) ||
-            /^(data:|blob:|javascript:|mailto:|tel:|intent:)/i.test(trimmed)
-          ) {
-            return trimmed;
-          }
-
-          let abs;
-          try {
-            abs = new URL(trimmed, window.location.href);
-          } catch {
-            return trimmed;
-          }
-
-          if (window.location.origin === "null" || abs.origin !== window.location.origin) {
-            return trimmed;
-          }
-
-          return `${CUSTOM_SCHEME}${abs.host}${abs.pathname}${abs.search}`;
-        }
-
-        function appendResource(tag, attr, value, props = {}) {
-          if (!value) return;
-          const el = document.createElement(tag);
-          Object.assign(el, props);
-          el.setAttribute(attr, value);
-          document.head.appendChild(el);
-        }
-
-        const useCustomScheme = isIOSApp();
-        const cssHref = useCustomScheme ? toCustomScheme("./styles.css") : "./styles.css";
-        const jsSrc = useCustomScheme ? toCustomScheme("./main.js") : "./main.js";
-
-        appendResource("link", "href", cssHref, { rel: "stylesheet" });
-        appendResource("script", "src", jsSrc, { defer: true });
-
-        if (useCustomScheme) {
-          document.addEventListener("DOMContentLoaded", () => {
-            const nodes = document.querySelectorAll(
-              'img[src], source[src], video[src], audio[src], track[src], iframe[src], script[src], link[rel~="stylesheet"][href], link[rel="preload"][href]'
-            );
-            nodes.forEach((el) => {
-              const attr = el.hasAttribute("src") ? "src" : "href";
-              const next = toCustomScheme(el.getAttribute(attr));
-              if (next && next !== el.getAttribute(attr)) {
-                el.setAttribute(attr, next);
-              }
-            });
-          });
-        }
-      })();
-    </script>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./main.js"></script>
   </head>
   <body>
     <header class="container header">
@@ -96,12 +30,6 @@
     </header>
 
     <main class="container main">
-      <section id="resources" class="about">
-        <h2>资源来源</h2>
-        <p class="muted">列出页面加载的资源路径（含自定义协议）。</p>
-        <ul id="resourceList" class="list"></ul>
-      </section>
-
       <section class="hero">
         <p class="pill">Auto Theme • Light/Dark</p>
         <h1>自动切换深色/浅色模式的网站</h1>
