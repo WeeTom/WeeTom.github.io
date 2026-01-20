@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>WeeTom - 自动深色/浅色模式示例</title>
+    <title>WeeTom - Service Worker 调试面板</title>
     <meta
       name="description"
-      content="一个支持自动切换深色/浅色模式的网站示例，内容简单呈现。"
+      content="一个用于快速调试和验证 Service Worker 的简易面板。"
     />
     <link rel="stylesheet" href="./styles.css" />
     <script defer src="./main.js"></script>
@@ -18,81 +18,69 @@
         <span class="brand__dot" aria-hidden="true"></span>
         <span class="brand__text">WeeTom</span>
       </a>
-
-      <div class="theme">
-        <label class="theme__label" for="themeMode">主题</label>
-        <select id="themeMode" class="theme__select" aria-label="主题模式">
-          <option value="auto">自动（跟随系统）</option>
-          <option value="light">浅色</option>
-          <option value="dark">深色</option>
-        </select>
-      </div>
     </header>
 
     <main class="container main">
       <section class="hero">
-        <p class="pill">Auto Theme • Light/Dark</p>
-        <h1>自动切换深色/浅色模式的网站</h1>
-        <p class="muted">
-          默认跟随你的系统外观设置；你也可以在右上角选择「浅色/深色」强制覆盖，并会自动记住。
-        </p>
+        <p class="pill">Service Worker • Dev Tools</p>
+        <h1>Service Worker 调试面板</h1>
+        <p class="muted">用于本地快速验证注册、缓存、离线兜底等行为。</p>
         <div class="hero__actions">
-          <a class="btn btn--primary" href="#cards">看示例内容</a>
-          <a class="btn btn--ghost" href="#about">了解实现方式</a>
+          <button class="btn btn--primary" id="registerBtn">注册/刷新 SW</button>
+          <button class="btn btn--ghost" id="unregisterBtn">注销 SW</button>
+          <button class="btn" id="clearCacheBtn">清空缓存</button>
         </div>
       </section>
 
-      <section id="cards" class="grid">
-        <article class="card">
-          <h2>更舒适的阅读</h2>
-          <p class="muted">
-            深色模式更适合夜间；浅色模式更适合强光环境。自动切换可减少手动操作。
-          </p>
-          <ul class="list">
-            <li>跟随系统偏好</li>
-            <li>支持手动覆盖</li>
-            <li>设置可持久化</li>
-          </ul>
-        </article>
-
-        <article class="card">
-          <h2>设计更统一</h2>
-          <p class="muted">
-            通过 CSS 变量统一管理颜色、阴影与边框，组件在两种主题下保持一致的层级与对比度。
-          </p>
-          <div class="swatches" aria-label="颜色示例">
-            <span class="swatch swatch--accent" title="强调色"></span>
-            <span class="swatch swatch--surface" title="卡片底色"></span>
-            <span class="swatch swatch--border" title="边框色"></span>
+      <section id="panels" class="grid">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2>运行状态</h2>
+            <button class="btn btn--ghost" id="checkStatusBtn">刷新状态</button>
+          </div>
+          <div class="status">
+            <span class="status__dot" id="swDot" aria-hidden="true"></span>
+            <div class="status__text">
+              <strong id="swState">未知</strong>
+              <p class="muted" id="swDetail">等待获取注册信息...</p>
+            </div>
+          </div>
+          <div class="grid grid--two">
+            <div>
+              <p class="muted label">作用域</p>
+              <p id="swScope">--</p>
+            </div>
+            <div>
+              <p class="muted label">版本缓存</p>
+              <p id="cacheNames">--</p>
+            </div>
           </div>
         </article>
 
-        <article class="card">
-          <h2>实现简单</h2>
-          <p class="muted">
-            使用 <code>prefers-color-scheme</code> 处理自动模式，用 <code>data-theme</code>
-            处理手动覆盖。
-          </p>
-          <pre class="code" aria-label="示例代码片段"><code>/* 自动模式（默认） */
-@media (prefers-color-scheme: dark) { ... }
-
-/* 手动覆盖 */
-html[data-theme="dark"] { ... }</code></pre>
+        <article class="card panel">
+          <div class="panel__header">
+            <h2>缓存与请求</h2>
+            <div class="panel__actions">
+              <button class="btn btn--ghost" id="listCacheBtn">列出缓存</button>
+              <button class="btn" id="fetchTestBtn">测试请求</button>
+            </div>
+          </div>
+          <ul class="list" id="cacheList" aria-live="polite">
+            <li class="muted">点击“列出缓存”以查看当前缓存键</li>
+          </ul>
+          <p class="muted small">提示：在浏览器 DevTools → Application → Service Workers 面板可进一步查看。</p>
         </article>
       </section>
 
-      <section id="about" class="about">
-        <h2>关于这个页面</h2>
-        <p class="muted">
-          这是一个不依赖任何框架的示例页：打开即可运行，适合做模板或快速原型。你想要换成 React/Next.js/Vite
-          也很容易，我可以继续帮你升级。
-        </p>
+      <section class="about">
+        <h2>日志</h2>
+        <pre class="log" id="log" aria-live="polite">等待事件...</pre>
       </section>
     </main>
 
     <footer class="container footer">
       <span class="muted">© <span id="year"></span> WeeTom</span>
-      <span class="muted">自动深色/浅色模式示例</span>
+      <span class="muted">Service Worker 调试面板</span>
     </footer>
   </body>
 </html>
